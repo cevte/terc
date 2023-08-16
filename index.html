@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.6.0/signature_pad.min.js"></script>
     <title>Firma Digital</title>
     <style>
@@ -30,9 +31,10 @@
     </div>
     <script>
         const canvas = document.getElementById('signatureCanvas');
-        const signaturePad = new SignaturePad(canvas, {
-            onEnd: updateDownloadLink
-        });
+        const signaturePad = new SignaturePad(canvas);
+
+        const mc = new Hammer(canvas);
+        mc.on('panstart panmove pancancel panend', handlePan);
 
         const clearButton = document.getElementById('clearButton');
         const saveButton = document.getElementById('saveButton');
@@ -53,6 +55,29 @@
                 downloadLink.style.display = 'block';
             }
         });
+
+        function handlePan(event) {
+            const touches = event.pointers;
+
+            if (event.type === 'panstart') {
+                signaturePad.clear();
+            }
+
+            if (event.type === 'panend' && touches.length === 0) {
+                updateDownloadLink();
+            }
+
+            touches.forEach(touch => {
+                const x = touch.clientX - canvas.getBoundingClientRect().left;
+                const y = touch.clientY - canvas.getBoundingClientRect().top;
+
+                signaturePad.handleTouch({
+                    clientX: x,
+                    clientY: y,
+                    getBoundingClientRect: () => canvas.getBoundingClientRect()
+                });
+            });
+        }
 
         function updateDownloadLink() {
             if (signaturePad.isEmpty()) {
