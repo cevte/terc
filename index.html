@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.6.0/signature_pad.min.js"></script>
+    <title>Firma Digital</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #signatureCanvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h2>Firma Digital</h2>
+        <canvas id="signatureCanvas"></canvas>
+        <br>
+        <button id="clearButton">Limpiar Firma</button>
+        <button id="saveButton">Guardar Firma</button>
+        <a id="downloadLink" style="display: none;">Descargar Firma</a>
+    </div>
+    <script>
+        const canvas = document.getElementById('signatureCanvas');
+        const signaturePad = new SignaturePad(canvas, {
+            onEnd: updateDownloadLink
+        });
+
+        const clearButton = document.getElementById('clearButton');
+        const saveButton = document.getElementById('saveButton');
+        const downloadLink = document.getElementById('downloadLink');
+
+        clearButton.addEventListener('click', () => {
+            signaturePad.clear();
+            updateDownloadLink();
+        });
+
+        saveButton.addEventListener('click', () => {
+            if (signaturePad.isEmpty()) {
+                alert('Firma vacía, por favor firma primero.');
+            } else {
+                const dataURL = signaturePad.toDataURL();
+                downloadLink.href = dataURL;
+                downloadLink.download = 'firma.png';
+                downloadLink.style.display = 'block';
+            }
+        });
+
+        function updateDownloadLink() {
+            if (signaturePad.isEmpty()) {
+                downloadLink.style.display = 'none';
+            } else {
+                downloadLink.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
